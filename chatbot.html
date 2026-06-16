@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>React Basics</title>
+  </head>
+  <body>
+    <div class="js-container"></div>
+    <script src="react-basics.js">    </script>
+    <script src="https://unpkg.com/supersimpledev/react.js"></script>
+    <script src="https://unpkg.com/supersimpledev/react-dom.js"></script>
+    
+    
+    <script src="https://unpkg.com/supersimpledev/babel.js"></script>
+    <script type="text/babel">
+      const { useState } = React;
+
+      function Chatinput({ value, onChange, onSend }) {
+        return (
+          <div style={{ marginBottom: '1rem' }}>
+            <input
+              type="text"
+              placeholder="Send a message to Chatbot"
+              value={value}
+              onChange={onChange}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  onSend();
+                }
+              }}
+              size="30"
+            />
+            <button onClick={onSend}>Send</button>
+          </div>
+        );
+      }
+
+      function Chatmessage(props) {
+        const { message, sender } = props;
+
+        return (
+          <div style={{ marginBottom: '0.5rem' }}>
+            {sender === 'robot' && <img src="chatbot.jpg" width="40" alt="bot" style={{ verticalAlign: 'middle', marginRight: '0.5rem' }} />}
+            <span>{message}</span>
+            {sender === 'user' && <img src="user.png" width="40" alt="user" style={{ verticalAlign: 'middle', marginLeft: '0.5rem' }} />}
+          </div>
+        );
+      }
+
+      function Chat() {
+        const [messages, setMessages] = useState([
+          { message: 'Hello! I am your chatbot. Ask me anything.', sender: 'robot', id: '1' }
+        ]);
+        const [inputValue, setInputValue] = useState('');
+
+        const sendMessage = () => {
+          const trimmed = inputValue.trim();
+          if (!trimmed) return;
+
+          const userMessage = { message: trimmed, sender: 'user', id: Date.now().toString() };
+          const botResponse = { message: getBotReply(trimmed), sender: 'robot', id: (Date.now() + 1).toString() };
+
+          setMessages((prev) => [...prev, userMessage, botResponse]);
+          setInputValue('');
+        };
+
+        const getBotReply = (text) => {
+          const lower = text.toLowerCase();
+          if (lower.includes('date')) {
+            return `Today is ${new Date().toLocaleDateString()}.`;
+          }
+          if (lower.includes('time')) {
+            return `The current time is ${new Date().toLocaleTimeString()}.`;
+          }
+          if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+            return 'Hello there! How can I help you today?';
+          }
+          if (lower.includes('help')) {
+            return 'I can answer simple questions about date, time, or greetings.';
+          }
+          return "I'm not sure about that yet, but I can help with the date, time, or a greeting.";
+        };
+
+        return (
+          <>
+            <Chatinput
+              value={inputValue}
+              onChange={(event) => setInputValue(event.target.value)}
+              onSend={sendMessage}
+            />
+            <div>
+              {messages.map((chat) => (
+                <Chatmessage
+                  message={chat.message}
+                  sender={chat.sender}
+                  key={chat.id}
+                />
+              ))}
+            </div>
+          </>
+        );
+      }
+
+      function App() {
+        return (
+          <>
+            <Chat />
+          </>
+        );
+      }
+
+      const container = document.querySelector('.js-container');
+      ReactDOM.createRoot(container).render(<App />);
+    </script>
+  </body>
+</html>
